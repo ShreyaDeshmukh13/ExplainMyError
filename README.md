@@ -26,12 +26,10 @@ ExplainMyError is a full-stack debugging assistant that helps developers underst
 ---
 
 ## 📸 Screenshots
+<img width="1917" height="1140" alt="image" src="https://github.com/user-attachments/assets/550b5546-3f5d-457d-bf8f-a1a3eeb89955" />
+<img width="1905" height="1020" alt="image" src="https://github.com/user-attachments/assets/da03814c-c66d-4037-a8e1-0664dccb3fd1" />
+<img width="1914" height="1023" alt="image" src="https://github.com/user-attachments/assets/c63845c5-5d2a-4a02-a38b-24f77633f8f3" />
 
-> Add screenshots of:
->
-> * Home page
-> * Error analysis output
-> * History page
 
 ---
 
