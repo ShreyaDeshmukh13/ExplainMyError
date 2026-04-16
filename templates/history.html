@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExplainMyError - Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="brand-icon" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <a href="{{ url_for('index') }}" class="nav-link-brand">ExplainMyError</a>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('history') }}" class="nav-link active">History & Analytics</a>
+        </div>
+    </nav>
+
+    <main class="container custom-scrollbar">
+        
+        <h2 class="page-title">Error Analytics Dashboard</h2>
+        
+        <!-- NEW ANALYTICS DASHBOARD -->
+        <div class="analytics-dashboard">
+            <div class="stat-box">
+                <h4>Total Processed</h4>
+                <span>{{ total_errors }}</span>
+            </div>
+            <div class="stat-box">
+                <h4>Most Common</h4>
+                <span>{{ most_common_category }}</span>
+            </div>
+            <div class="stat-box" style="flex: 1.5;">
+                <h4>Distribution</h4>
+                <ul class="dist-list">
+                {% for cat, count in category_distribution %}
+                    <li><span>{{ cat }}</span> <span>{{ count }}</span></li>
+                {% else %}
+                    <li><span>No data yet.</span></li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- SEARCH FILTERS -->
+        <div class="history-controls">
+            <form class="search-form" method="GET" action="{{ url_for('history') }}">
+                <input type="text" name="q" placeholder="Search trace anomalies..." value="{{ query }}">
+                <select name="category">
+                    <option value="">All Categories Filter</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-primary">Search Deep Query</button>
+            </form>
+        </div>
+        
+        <div class="history-list">
+            {% for log in logs %}
+            <div class="history-card">
+                <div class="history-header">
+                    <div>
+                        <span class="timestamp">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span class="status-badge running">{{ log.category }}</span>
+                        <span class="status-badge conf-{{ log.confidence|lower }}" style="margin-left: 8px;">{{ log.confidence }} Conf</span>
+                    </div>
+                    <div class="actions">
+                        <a href="{{ url_for('edit', id=log.id) }}" class="btn-secondary">Edit</a>
+                        <form method="POST" action="{{ url_for('delete', id=log.id) }}" style="display:inline;">
+                            <button type="submit" class="btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="history-content">
+                    <h4>Error Text Trace</h4>
+                    <pre class="custom-scrollbar"><code>{{ log.error_text }}</code></pre>
+                    <h4>Analysis Extraction</h4>
+                    <p>{{ log.explanation }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="pane" style="text-align: center; padding: 4rem;">
+                <p style="opacity: 0.5; font-weight:600;">No historic diagnostics recorded within requested constraints.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

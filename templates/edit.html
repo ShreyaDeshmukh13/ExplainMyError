@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Diagnosis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="brand-icon" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <a href="{{ url_for('index') }}" class="nav-link-brand">ExplainMyError</a>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('history') }}" class="nav-link active">History</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h2 class="page-title">Edit Analysis Data</h2>
+        <form class="pane edit-form" method="POST" action="{{ url_for('edit', id=log.id) }}">
+            <div class="pane-body" style="padding-top: 1.5rem;">
+                <label>Update Original Error String</label>
+                <textarea name="error_text" class="custom-scrollbar" placeholder="Update the raw error string to regenerate diagnostics" required>{{ log.error_text }}</textarea>
+            </div>
+            <div class="bottom-actions" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <a href="{{ url_for('history') }}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary">Re-Analyze & Update</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

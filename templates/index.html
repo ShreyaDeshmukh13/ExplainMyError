@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExplainMyError Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="brand-icon" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <a href="{{ url_for('index') }}" class="nav-link-brand">ExplainMyError</a>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" class="nav-link active">Home</a>
+            <a href="{{ url_for('history') }}" class="nav-link">History & Analytics</a>
+        </div>
+    </nav>
+
+    <main class="app-layout">
+        
+        <aside class="pane sidebar-pane">
+            <header class="pane-header"><div class="pane-title">Recent Errors</div></header>
+            <div class="pane-body custom-scrollbar">
+                {% if recent_errors %}
+                    <ul class="recent-list">
+                    {% for error in recent_errors %}
+                        <li>
+                            <a href="{{ url_for('index', id=error.id) }}" class="recent-link">
+                                <span class="recent-cat">{{ error.category }}</span>
+                                <span class="recent-time">{{ error.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-view" style="position:static; margin-top:3rem; transform:none;">
+                        <span style="font-size: 0.95rem;">No recent queries</span>
+                    </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <section class="pane input-pane">
+            <header class="pane-header">
+                <div class="pane-title">Raw Trace Input</div>
+            </header>
+            <form class="pane-body form-flex custom-scrollbar" method="POST" action="{{ url_for('index') }}">
+                <textarea name="error_text" id="errorInput" spellcheck="false" placeholder="Paste your stack trace or error sequence here..." required>{% if not latest_error and request.form.get('error_text') %}{{ request.form.error_text }}{% endif %}</textarea>
+                <div class="bottom-actions">
+                    <button type="submit" class="btn-primary" id="analyzeBtn" onclick="this.innerHTML='Loading...'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="icon" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Analyze Error
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="pane output-pane">
+            <header class="pane-header">
+                <div class="pane-title">Intelligent Diagnostics</div>
+                <div class="header-tags">
+                    {% if latest_error %}
+                    <span class="status-badge running">{{ latest_error.category }}</span>
+                    <span class="status-badge conf-{{ latest_error.confidence|lower }}">{{ latest_error.confidence }} Confidence</span>
+                    {% else %}
+                    <span class="status-badge default">Awaiting Input</span>
+                    {% endif %}
+                </div>
+            </header>
+            
+            {% if latest_error %}
+            <div class="pane-body custom-scrollbar" id="resultsSection">
+                <article class="diagnostic-section">
+                    <h3>Explanation</h3>
+                    <p>{{ latest_error.explanation }}</p>
+                </article>
+
+                <article class="diagnostic-section">
+                    <h3>Root Cause</h3>
+                    <p>{{ latest_error.root_cause }}</p>
+                </article>
+
+                <article class="diagnostic-section fix-section">
+                    <div class="fix-header">
+                        <h3>Actionable Fix</h3>
+                        <button class="btn-copy" onclick="copyFixText(`{{ latest_error.fix | replace('`', '\\\`') | replace('$', '\\$') }}`)">
+                            Copy Fix
+                        </button>
+                    </div>
+                    <p id="fixText">{{ latest_error.fix }}</p>
+                </article>
+
+                <article class="diagnostic-section">
+                    <h3>Code Comparison</h3>
+                    <div class="diff-container">
+                        <div class="diff-panel incorrect">
+                            <div class="diff-tag">Bad Practice</div>
+                            <pre class="custom-scrollbar"><code>{{ latest_error.example_incorrect }}</code></pre>
+                        </div>
+                        <div class="diff-panel correct">
+                            <div class="diff-tag">Correct Solution</div>
+                            <pre class="custom-scrollbar"><code>{{ latest_error.example_correct }}</code></pre>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            {% else %}
+            <div class="empty-view" id="emptyState">
+                <svg viewBox="0 0 24 24" width="64" height="64" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                </svg>
+                <span>Provide an error trace to classify</span>
+            </div>
+            {% endif %}
+        </section>
+        
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
