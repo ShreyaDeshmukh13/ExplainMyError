@@ -37,8 +37,6 @@ def index():
     log_id = request.args.get('id')
     if log_id:
         latest_error = ErrorLog.query.get(log_id)
-    else:
-        latest_error = ErrorLog.query.order_by(ErrorLog.created_at.desc()).first()
         
     recent_errors = ErrorLog.query.order_by(ErrorLog.created_at.desc()).limit(5).all()
     return render_template('index.html', latest_error=latest_error, recent_errors=recent_errors)
